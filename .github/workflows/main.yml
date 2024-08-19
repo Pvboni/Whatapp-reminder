@@ -21,4 +21,4 @@ jobs:
         pip install pywhatkit
 
     - name: Run script
-      run: python Pythons.py  # Rode o script Python
+      run: python Python.py  # Rode o script Python
