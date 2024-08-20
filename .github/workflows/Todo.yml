@@ -21,6 +21,6 @@ jobs:
 
     - name: Run Python script
       env:
-        TODOIST_API_KEY: ${{ secrets.TODOIST_API_KEY }}
+        YOUR_TODOIST_API_KEY: ${{ secrets.YOUR_TODOIST_API_KEY }}
         
       run: python todo1.py
