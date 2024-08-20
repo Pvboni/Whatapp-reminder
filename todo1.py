@@ -29,14 +29,9 @@ try:
         exit(0)
 
     # Definir o caminho do arquivo CSV
-    directory = '/home/runner/work/Whatapp-reminder/Whatapp-reminder'
+    directory = '/'
     file_name = 'tarefas1.csv'
     file_path = os.path.join(directory, file_name)
-
-    # Criar o diretório, se não existir
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-        print(f"Diretório criado: {directory}")
 
     # Criar ou abrir o arquivo CSV
     with open(file_path, mode='w', newline='') as file:
