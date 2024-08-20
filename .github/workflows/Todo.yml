@@ -1,4 +1,4 @@
-name: Manual WhatsApp Messages
+name: Todoist
 
 on:
   workflow_dispatch:  # Manually trigger the workflow
