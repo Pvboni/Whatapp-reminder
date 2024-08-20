@@ -1,7 +1,7 @@
 import csv
 import os
 from dotenv import load_dotenv
-from todoist_api_python.api import TodoistAPI  # Corrigido o caminho de importação
+from todoist_api_python.api import TodoistAPI
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -32,7 +32,7 @@ with open(csv_file_path, mode='w', newline='', encoding='utf-8') as file:
     for task in pending_tasks:
         task_name = task.content
         due_date = task.due.date if task.due else 'Sem data'
-        due_time = task.due.datetime if task.due and 'datetime' in task.due else 'Sem hora'
+        due_time = task.due.datetime if task.due and task.due.datetime else 'Sem hora'
         writer.writerow([task_name, due_date, due_time])
 
 print(f"Arquivo CSV gerado com sucesso em {csv_file_path}.")
