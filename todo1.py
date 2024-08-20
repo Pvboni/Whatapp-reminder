@@ -18,6 +18,7 @@ api = TodoistAPI(api_key)
 try:
     # Data atual
     hoje = datetime.datetime.now().strftime('%Y-%m-%d')
+    print(f"Data de hoje: {hoje}")
 
     # Obter todas as tarefas
     tasks = api.get_tasks()
@@ -27,11 +28,18 @@ try:
         print("Nenhuma tarefa encontrada.")
         exit(0)
 
-    # Nome do arquivo CSV
+    # Definir o caminho do arquivo CSV
+    directory = '/home/runner/work/Whatapp-reminder/Whatapp-reminder'
     file_name = 'tarefas1.csv'
+    file_path = os.path.join(directory, file_name)
+
+    # Criar o diretório, se não existir
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        print(f"Diretório criado: {directory}")
 
     # Criar ou abrir o arquivo CSV
-    with open(file_name, mode='w', newline='') as file:
+    with open(file_path, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['Tarefa', 'Dia', 'Hora'])
 
@@ -42,6 +50,9 @@ try:
         for task in tasks:
             due_date = task.due.date if task.due else 'Sem data'
             due_time = task.due.datetime if task.due and task.due.datetime else 'Sem hora'
+
+            # Imprimir todas as tarefas para depuração
+            print(f"Tarefa: {task.content}, Data: {due_date}, Hora: {due_time}")
 
             # Verifica se a tarefa é para o dia de hoje
             if due_date == hoje:
@@ -55,11 +66,11 @@ try:
             print("Arquivo CSV gerado com sucesso.")
 
     # Obter o caminho absoluto do arquivo
-    absolute_path = os.path.abspath(file_name)
+    absolute_path = os.path.abspath(file_path)
     print(f"Arquivo CSV salvo em: {absolute_path}")
 
     # Leitura do conteúdo do CSV gerado
-    with open(file_name, mode='r') as file:
+    with open(file_path, mode='r') as file:
         content = file.read()
         print("Conteúdo do arquivo CSV:\n", content)
 
