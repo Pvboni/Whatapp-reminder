@@ -1,4 +1,4 @@
-name: Generate CSV from Todoist V2
+name: Generate CSV from Todoist
 
 on:
   workflow_dispatch:  # Permite que o workflow seja iniciado manualmente
@@ -24,6 +24,9 @@ jobs:
       env:
         YOUR_TODOIST_API_KEY: ${{ secrets.YOUR_TODOIST_API_KEY }}
       run: python todo1.py
+
+    - name: Check if CSV exists
+      run: ls -l tarefas1.csv
 
     - name: Commit and push changes
       run: |
