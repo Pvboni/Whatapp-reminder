@@ -1,0 +1,36 @@
+name: Generate CSV from Todoist
+
+on:
+  workflow_dispatch:  # Permite que o workflow seja iniciado manualmente
+
+jobs:
+  run_python_script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        pip install python-dotenv todoist-api-python requests
+
+    - name: Run Python script
+      env:
+        YOUR_TODOIST_API_KEY: ${{ secrets.YOUR_TODOIST_API_KEY }}
+      run: python todo1.py
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git add tarefas1.csv
+        git commit -m "Atualizando arquivo CSV de tarefas"
+        git push https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/<seu-usuario>/<seu-repo>.git main
+      env:
+        PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
