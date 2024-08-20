@@ -31,6 +31,9 @@ jobs:
         YOUR_TODOIST_API_KEY: ${{ secrets.YOUR_TODOIST_API_KEY }}
       run: python todo1.py
 
+    - name: List files
+      run: ls -la
+
     - name: Commit and Push CSV to GitHub
       run: |
         git config --global user.name 'GitHub Action'
