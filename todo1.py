@@ -1,11 +1,11 @@
 import csv
 import os
 from dotenv import load_dotenv
-from todoist_api_python import TodoistAPI
+from todoist_api_python.api import TodoistAPI  # Corrigido o caminho de importação
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
-todoist_api_key = os.getenv('TODOIST_API_KEY')
+todoist_api_key = os.getenv('YOUR_TODOIST_API_KEY')
 
 if todoist_api_key is None:
     print("Chave da API do Todoist não encontrada. Verifique o arquivo .env.")
@@ -13,13 +13,18 @@ if todoist_api_key is None:
 
 # Conectar à API do Todoist
 api = TodoistAPI(todoist_api_key)
-tasks = api.get_tasks()
+
+try:
+    tasks = api.get_tasks()
+except Exception as e:
+    print(f"Erro ao buscar tarefas: {e}")
+    exit(1)
 
 # Filtrar tarefas pendentes
-pending_tasks = [task for task in tasks if not task.completed]
+pending_tasks = [task for task in tasks if task.due and not task.is_completed]
 
 # Criar um arquivo CSV
-csv_file_path = 'tarefasv1.csv'
+csv_file_path = 'tarefas.csv'
 with open(csv_file_path, mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(['tarefas', 'dia', 'hora'])
