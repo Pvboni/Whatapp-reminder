@@ -1,0 +1,26 @@
+name: Manual WhatsApp Messages
+
+on:
+  workflow_dispatch:  # Manually trigger the workflow
+
+jobs:
+  send_whatsapp_messages:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+         pip install python-dotenv todoist-python
+
+    - name: Run Python script
+      env:
+        TODOIST_API_KEY: ${{ secrets.TODOIST_API_KEY }}
+        
+      run: python todo1.py
