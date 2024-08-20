@@ -1,5 +1,6 @@
 import csv
 import os
+import datetime
 import base64
 import requests
 from todoist_api_python.api import TodoistAPI
@@ -14,26 +15,19 @@ if not api_key:
     print("API key not found.")
     exit(1)
 
-# Repositório e caminho do arquivo no GitHub
-repo = "Pvboni/Whatapp-reminder"
-path = "tarefas1.csv"
-
 api = TodoistAPI(api_key)
 
 try:
     # Obter todas as tarefas abertas
-    tasks = api.get_tasks(filter="(today | overdue)")
+    tasks = api.get_tasks()
 
     # Verificar se há tarefas
     if not tasks:
         print("Nenhuma tarefa encontrada.")
         exit(0)
 
-    # Ordenar as tarefas pela data de conclusão
-    tasks.sort(key=lambda x: x.due.date if x.due else '')
-
     # Definir o caminho do arquivo CSV
-    directory = os.getcwd()
+    directory = os.getcwd()  # Diretório atual de trabalho
     file_name = 'tarefas1.csv'
     file_path = os.path.join(directory, file_name)
 
@@ -42,15 +36,24 @@ try:
         writer = csv.writer(file)
         writer.writerow(['Tarefa', 'Dia', 'Hora'])
 
+        # Ordenar as tarefas pela data de conclusão
+        tasks_sorted = sorted(
+            tasks, 
+            key=lambda x: x.due.date if x.due else ''
+        )
+
         # Escrever as tarefas no CSV
-        for task in tasks:
+        for task in tasks_sorted:
             due_date = task.due.date if task.due else 'Sem data'
             due_time = task.due.datetime if task.due and task.due.datetime else 'Sem hora'
             writer.writerow([task.content, due_date, due_time])
             print(f"Tarefa adicionada: {task.content} - {due_date} {due_time}")
 
     print("Arquivo CSV gerado com sucesso.")
-    print(f"Arquivo CSV salvo em: {os.path.abspath(file_path)}")
+
+    # Obter o caminho absoluto do arquivo
+    absolute_path = os.path.abspath(file_path)
+    print(f"Arquivo CSV salvo em: {absolute_path}")
 
 except Exception as e:
     print(f"Erro ao gerar o arquivo CSV: {e}")
