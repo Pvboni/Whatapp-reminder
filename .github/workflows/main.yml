@@ -19,6 +19,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pywhatkit
+        sudo apt-get install -y xvfb
+        pip install pyautogui
 
-    - name: Run script
-      run: python Python.py  # Rode o script Python
+    - name: Run script with xvfb
+      run: |
+        xvfb-run --auto-servernum -- python Python.py  # Rode o script Python
