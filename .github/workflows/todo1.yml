@@ -1,12 +1,11 @@
-name: Generate CSV from Todoist
+name: Generate CSV from Todoist 2
 
 on:
-  workflow_dispatch:  # Permite que o workflow seja iniciado manualmente
+  workflow_dispatch:  # Manually trigger the workflow
 
 jobs:
   run_python_script:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -20,15 +19,19 @@ jobs:
       run: |
         pip install python-dotenv todoist-api-python requests
 
+    - name: Validate GitHub Token
+      run: |
+        echo "Validating Personal Access Token..."
+        curl -H "Authorization: token ${{ secrets.PERSONAL_ACCESS_TOKEN }}" https://api.github.com/repos/Pvboni/Whatapp-reminder || exit 1
+      env:
+        PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
     - name: Run Python script
       env:
         YOUR_TODOIST_API_KEY: ${{ secrets.YOUR_TODOIST_API_KEY }}
       run: python todo1.py
 
-    - name: Check if CSV exists
-      run: ls -l tarefas1.csv
-
-    - name: Commit and push changes
+    - name: Commit and Push CSV to GitHub
       run: |
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
@@ -37,3 +40,9 @@ jobs:
         git push https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/Pvboni/Whatapp-reminder.git main
       env:
         PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+    - name: Upload CSV as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: tarefas-csv
+        path: tarefas1.csv
