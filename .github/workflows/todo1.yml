@@ -1,4 +1,4 @@
-name: Generate CSV from Todoist 2
+name: Generate CSV from Todoist
 
 on:
   workflow_dispatch:  # Manually trigger the workflow
