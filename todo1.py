@@ -29,7 +29,7 @@ try:
         exit(0)
 
     # Definir o caminho do arquivo CSV
-    directory = '/'
+    directory = os.getcwd()  # Diretório atual de trabalho
     file_name = 'tarefas1.csv'
     file_path = os.path.join(directory, file_name)
 
