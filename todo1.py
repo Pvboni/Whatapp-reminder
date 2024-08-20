@@ -1,11 +1,11 @@
 import csv
 import os
 from dotenv import load_dotenv
-from todoist.api import TodoistAPI
+from todoist_api_python import TodoistAPI
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
-todoist_api_key = os.getenv('YOUR_TODOIST_API_KEY')
+todoist_api_key = os.getenv('TODOIST_API_KEY')
 
 if todoist_api_key is None:
     print("Chave da API do Todoist não encontrada. Verifique o arquivo .env.")
@@ -13,21 +13,21 @@ if todoist_api_key is None:
 
 # Conectar à API do Todoist
 api = TodoistAPI(todoist_api_key)
-api.sync()
+tasks = api.get_tasks()
 
-# Obter todas as tarefas pendentes
-tasks = api.state['items']
-pending_tasks = [task for task in tasks if task['checked'] == 0]
+# Filtrar tarefas pendentes
+pending_tasks = [task for task in tasks if not task.completed]
 
 # Criar um arquivo CSV
-with open('tarefas.csv', mode='w', newline='', encoding='utf-8') as file:
+csv_file_path = 'tarefas.csv'
+with open(csv_file_path, mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(['tarefas', 'dia', 'hora'])
 
     for task in pending_tasks:
-        task_name = task['content']
-        due_date = task['due']['date'] if task['due'] else 'Sem data'
-        due_time = task['due']['datetime'] if task['due'] and 'datetime' in task['due'] else 'Sem hora'
+        task_name = task.content
+        due_date = task.due.date if task.due else 'Sem data'
+        due_time = task.due.datetime if task.due and 'datetime' in task.due else 'Sem hora'
         writer.writerow([task_name, due_date, due_time])
 
-print("Arquivo CSV gerado com sucesso.")
+print(f"Arquivo CSV gerado com sucesso em {csv_file_path}.")
