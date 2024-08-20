@@ -34,6 +34,6 @@ jobs:
         git config --global user.email 'action@github.com'
         git add tarefas1.csv
         git commit -m "Atualizando arquivo CSV de tarefas"
-        git push https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/<seu-usuario>/<seu-repo>.git main
+        git push https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/Pvboni/Whatapp-reminder.git main
       env:
         PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
