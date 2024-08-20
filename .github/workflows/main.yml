@@ -22,13 +22,16 @@ jobs:
         pip install pyvirtualdisplay
         pip install pyautogui
 
-    - name: Run script with virtual display
+    - name: Create Python script
       run: |
-        from pyvirtualdisplay import Display
-        display = Display(visible=0, size=(1024, 768))
-        display.start()
-        import pywhatkit as kit
-        def enviar_mensagem():
-            kit.sendwhatmsg('+5511998995650', 'Lembrete: Jantar no domingo!', 12, 0)
-        enviar_mensagem()
-        display.stop()
+        echo "from pyvirtualdisplay import Display" > script.py
+        echo "display = Display(visible=0, size=(1024, 768))" >> script.py
+        echo "display.start()" >> script.py
+        echo "import pywhatkit as kit" >> script.py
+        echo "def enviar_mensagem():" >> script.py
+        echo "    kit.sendwhatmsg('+5511998995650', 'Lembrete: Jantar no domingo!', 12, 0)" >> script.py
+        echo "enviar_mensagem()" >> script.py
+        echo "display.stop()" >> script.py
+
+    - name: Run Python script
+      run: python script.py  # Rode o script Python
