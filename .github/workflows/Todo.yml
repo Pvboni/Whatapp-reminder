@@ -28,9 +28,13 @@ jobs:
       run: |
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
-        git stash  # Guardar as mudanças locais
+        if [ -n "$(git status --porcelain)" ]; then
+          git stash  # Guardar as mudanças locais
+        fi
         git pull origin main  # Fazer o pull para trazer alterações remotas
-        git stash pop  # Reaplicar as mudanças locais guardadas
+        if [ -n "$(git stash list)" ]; then
+          git stash pop  # Reaplicar as mudanças locais guardadas, se houver
+        fi
         git add tarefas1.csv
         git commit -m "Atualizando arquivo CSV de tarefas"
         git push origin main
