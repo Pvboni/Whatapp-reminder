@@ -1,26 +1,25 @@
-name: Todoist
+name: Generate CSV from Todoist
 
 on:
   workflow_dispatch:  # Manually trigger the workflow
 
 jobs:
-  send_whatsapp_messages:
+  run_python_script:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v2
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v2
       with:
         python-version: '3.9'
 
     - name: Install dependencies
       run: |
-         pip install python-dotenv todoist-api-python
+        pip install python-dotenv todoist-api-python
 
     - name: Run Python script
       env:
-        YOUR_TODOIST_API_KEY: ${{ secrets.YOUR_TODOIST_API_KEY }}
-        
-      run: python todo1.py
+        TODOIST_API_KEY: ${{ secrets.TODOIST_API_KEY }}
+      run: python todo1.py  # Substitua pelo nome do seu script Python
