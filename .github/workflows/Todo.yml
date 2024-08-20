@@ -33,8 +33,9 @@ jobs:
       - name: Commit CSV to GitHub
         run: |
           git add tarefas1.csv
-          git commit -m "Atualizando arquivo CSV de tarefas"
-          git push
+          git commit --allow-empty -m "Atualizando arquivo CSV de tarefas"
+          git push  
+          
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # Use o seu PAT aqui
 
