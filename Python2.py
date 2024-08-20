@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from twilio.rest import Client
 from datetime import datetime
+import pytz
 
 # Carregar credenciais do Twilio das variáveis de ambiente
 account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
@@ -14,14 +15,17 @@ if account_sid is None or auth_token is None:
 
 client = Client(account_sid, auth_token)
 
+# Definir o fuso horário do Brasil (São Paulo)
+fuso_horario_brasil = pytz.timezone('America/Sao_Paulo')
+
+# Obter a data e hora atual no fuso horário do Brasil
+data_atual_brasil = datetime.now(fuso_horario_brasil).date()
+
 # Carregar o CSV com as tarefas
 df = pd.read_csv('tarefas.csv')
 
-# Obter a data atual
-data_atual = datetime.now().date()
-
-# Filtrar as tarefas do dia
-tarefas_do_dia = df[df['dia'] == data_atual.strftime('%Y-%m-%d')]
+# Filtrar as tarefas do dia atual no Brasil
+tarefas_do_dia = df[df['dia'] == data_atual_brasil.strftime('%Y-%m-%d')]
 
 # Se houver tarefas no dia atual
 if not tarefas_do_dia.empty:
