@@ -27,10 +27,16 @@ try:
         print("Nenhuma tarefa encontrada.")
         exit(0)
 
+    # Nome do arquivo CSV
+    file_name = 'tarefas1.csv'
+
     # Criar ou abrir o arquivo CSV
-    with open('tarefas1.csv', mode='w', newline='') as file:
+    with open(file_name, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['Tarefa', 'Dia', 'Hora'])
+
+        # Contador para tarefas adicionadas
+        tarefa_adicionada = False
 
         # Escrever as tarefas no CSV
         for task in tasks:
@@ -41,8 +47,21 @@ try:
             if due_date == hoje:
                 writer.writerow([task.content, due_date, due_time])
                 print(f"Tarefa adicionada: {task.content} - {due_date} {due_time}")
+                tarefa_adicionada = True
 
-    print("Arquivo CSV gerado com sucesso em tarefas1.csv.")
+        if not tarefa_adicionada:
+            print("Nenhuma tarefa foi adicionada ao arquivo CSV.")
+        else:
+            print("Arquivo CSV gerado com sucesso.")
+
+    # Obter o caminho absoluto do arquivo
+    absolute_path = os.path.abspath(file_name)
+    print(f"Arquivo CSV salvo em: {absolute_path}")
+
+    # Leitura do conteúdo do CSV gerado
+    with open(file_name, mode='r') as file:
+        content = file.read()
+        print("Conteúdo do arquivo CSV:\n", content)
 
 except Exception as e:
     print(f"Erro ao gerar o arquivo CSV: {e}")
