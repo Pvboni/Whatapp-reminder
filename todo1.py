@@ -24,7 +24,7 @@ except Exception as e:
 pending_tasks = [task for task in tasks if task.due and not task.is_completed]
 
 # Criar um arquivo CSV
-csv_file_path = 'tarefas.csv'
+csv_file_path = 'tarefas1.csv'
 with open(csv_file_path, mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(['tarefas', 'dia', 'hora'])
