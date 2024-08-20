@@ -17,7 +17,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install twilio pandas
+        pip install twilio pandas pytz
 
     - name: Run Python script
       env:
