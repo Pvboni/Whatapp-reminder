@@ -22,4 +22,10 @@ jobs:
     - name: Run Python script
       env:
         YOUR_TODOIST_API_KEY: ${{ secrets.YOUR_TODOIST_API_KEY }}
-      run: python todo1.py  # Substitua pelo nome do seu script Python
+      run: python todo1.py
+
+    - name: Upload CSV as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: tarefas-csv
+        path: tarefas1.csv  # Certifique-se de que o nome do arquivo corresponde ao que foi gerado no script
