@@ -1,4 +1,4 @@
-name: Whatapp Reminder
+name: Manual WhatsApp Messages
 
 on:
   workflow_dispatch:  # Manually trigger the workflow
@@ -17,21 +17,10 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install pywhatkit
-        pip install pyvirtualdisplay
-        pip install pyautogui
-
-    - name: Create Python script
-      run: |
-        echo "from pyvirtualdisplay import Display" > script.py
-        echo "display = Display(visible=0, size=(1024, 768))" >> script.py
-        echo "display.start()" >> script.py
-        echo "import pywhatkit as kit" >> script.py
-        echo "def enviar_mensagem():" >> script.py
-        echo "    kit.sendwhatmsg('+5511998995650', 'Lembrete: Jantar no domingo!', 12, 0)" >> script.py
-        echo "enviar_mensagem()" >> script.py
-        echo "display.stop()" >> script.py
+        pip install twilio
 
     - name: Run Python script
-      run: python script.py  # Rode o script Python
+      env:
+        TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+        TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      run: python Phyton.py
