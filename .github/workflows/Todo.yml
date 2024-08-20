@@ -1,7 +1,7 @@
 name: Generate CSV from Todoist
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Manually trigger the workflow
 
 jobs:
   run_python_script:
@@ -24,19 +24,13 @@ jobs:
         YOUR_TODOIST_API_KEY: ${{ secrets.YOUR_TODOIST_API_KEY }}
       run: python todo1.py
 
-    - name: Git stash, pull, and push changes
+    - name: Commit CSV to GitHub
       run: |
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
-        if [ -n "$(git status --porcelain)" ]; then
-          git stash  # Guardar as mudanças locais
-        fi
-        git pull origin main  # Fazer o pull para trazer alterações remotas
-        if [ -n "$(git stash list)" ]; then
-          git stash pop  # Reaplicar as mudanças locais guardadas, se houver
-        fi
+        git pull origin main  # Adicionando o git pull antes do push
         git add tarefas1.csv
         git commit -m "Atualizando arquivo CSV de tarefas"
         git push origin main
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
