@@ -4,23 +4,23 @@ on:
   workflow_dispatch:  # Manually trigger the workflow
 
 jobs:
-  run_python_script:
+  send_whatsapp_messages:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.9'  # Specify the Python version you want to use
+        python-version: '3.9'
 
     - name: Install dependencies
       run: |
-        pip install twilio
+        pip install twilio pandas
 
     - name: Run Python script
       env:
         TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
         TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
-      run: python Python.py
+      run: python Python2.py
