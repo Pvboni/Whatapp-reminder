@@ -1,73 +1,38 @@
-import csv
-import os
-import datetime
-from todoist_api_python.api import TodoistAPI
-from dotenv import load_dotenv
+name: Generate CSV from Todoist
 
-# Carregar variáveis de ambiente
-load_dotenv()
+on:
+  workflow_dispatch:  # Permite iniciar o workflow manualmente
 
-# Chave da API do Todoist
-api_key = os.getenv('YOUR_TODOIST_API_KEY')
-if not api_key:
-    print("API key not found.")
-    exit(1)
+permissions:
+  contents: write  # Permissões de escrita no repositório
 
-api = TodoistAPI(api_key)
+jobs:
+  run_python_script:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-try:
-    # Data atual
-    hoje = datetime.datetime.now().strftime('%Y-%m-%d')
-    print(f"Data de hoje: {hoje}")
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
 
-    # Obter todas as tarefas
-    tasks = api.get_tasks()
+    - name: Install dependencies
+      run: |
+        pip install python-dotenv todoist-api-python requests
 
-    # Verificar se há tarefas
-    if not tasks:
-        print("Nenhuma tarefa encontrada.")
-        exit(0)
+    - name: Run Python script
+      env:
+        YOUR_TODOIST_API_KEY: ${{ secrets.YOUR_TODOIST_API_KEY }}
+      run: python todo1.py
 
-    # Definir o caminho do arquivo CSV
-    directory = os.getcwd()  # Diretório atual de trabalho
-    file_name = 'tarefas1.csv'
-    file_path = os.path.join(directory, file_name)
-
-    # Criar ou abrir o arquivo CSV
-    with open(file_path, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['Tarefa', 'Dia', 'Hora'])
-
-        # Contador para tarefas adicionadas
-        tarefa_adicionada = False
-
-        # Escrever as tarefas no CSV
-        for task in tasks:
-            due_date = task.due.date if task.due else 'Sem data'
-            due_time = task.due.datetime if task.due and task.due.datetime else 'Sem hora'
-
-            # Imprimir todas as tarefas para depuração
-            print(f"Tarefa: {task.content}, Data: {due_date}, Hora: {due_time}")
-
-            # Verifica se a tarefa é para o dia de hoje
-            if due_date == hoje:
-                writer.writerow([task.content, due_date, due_time])
-                print(f"Tarefa adicionada: {task.content} - {due_date} {due_time}")
-                tarefa_adicionada = True
-
-        if not tarefa_adicionada:
-            print("Nenhuma tarefa foi adicionada ao arquivo CSV.")
-        else:
-            print("Arquivo CSV gerado com sucesso.")
-
-    # Obter o caminho absoluto do arquivo
-    absolute_path = os.path.abspath(file_path)
-    print(f"Arquivo CSV salvo em: {absolute_path}")
-
-    # Leitura do conteúdo do CSV gerado
-    with open(file_path, mode='r') as file:
-        content = file.read()
-        print("Conteúdo do arquivo CSV:\n", content)
-
-except Exception as e:
-    print(f"Erro ao gerar o arquivo CSV: {e}")
+    - name: Commit and push changes
+      run: |
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git add tarefas1.csv
+        git commit -m "Atualizando arquivo CSV de tarefas"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
