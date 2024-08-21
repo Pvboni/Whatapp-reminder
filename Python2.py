@@ -9,7 +9,7 @@ account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
 auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
 
 # Verificar se as credenciais foram carregadas corretamente
-if account_sid is None ou auth_token is None:
+if account_sid is None or auth_token is None:
     print("Twilio credentials not found. Please set the environment variables TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN.")
     exit(1)
 
