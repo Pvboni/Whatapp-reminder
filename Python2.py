@@ -1,46 +1,75 @@
+import csv
 import os
-import pandas as pd
+import datetime
+import requests
+from todoist_api_python.api import TodoistAPI
+from dotenv import load_dotenv
 from twilio.rest import Client
-from datetime import datetime
-import pytz
 
-# Carregar credenciais do Twilio das variáveis de ambiente
-account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
-auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
+# Carregar variáveis de ambiente
+load_dotenv()
 
-# Verificar se as credenciais foram carregadas corretamente
-if account_sid is None or auth_token is None:
-    print("Twilio credentials not found. Please set the environment variables TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN.")
+# Chave da API do Todoist
+api_key = os.getenv('YOUR_TODOIST_API_KEY')
+if not api_key:
+    print("API key not found.")
     exit(1)
+
+api = TodoistAPI(api_key)
+
+# Autenticação Twilio
+account_sid = os.getenv('TWILIO_ACCOUNT_SID')
+auth_token = os.getenv('TWILIO_AUTH_TOKEN')
+from_whatsapp_number = 'whatsapp:+14155238886'
+to_whatsapp_number = 'whatsapp:+5511998995650'
 
 client = Client(account_sid, auth_token)
 
-# Definir o fuso horário do Brasil (São Paulo)
-fuso_horario_brasil = pytz.timezone('America/Sao_Paulo')
+try:
+    # Obter todas as tarefas abertas
+    tasks = api.get_tasks()
 
-# Obter a data e hora atual no fuso horário do Brasil
-data_atual_brasil = datetime.now(fuso_horario_brasil).date()
+    # Filtrar apenas as tarefas pendentes
+    pending_tasks = [task for task in tasks if task.completed is False]
 
-# Carregar o CSV com as tarefas
-df = pd.read_csv('tarefas.csv')
+    # Verificar se há tarefas pendentes
+    if not pending_tasks:
+        print("Nenhuma tarefa pendente encontrada.")
+        exit(0)
 
-# Filtrar as tarefas do dia atual no Brasil
-tarefas_do_dia = df[df['dia'] == data_atual_brasil.strftime('%Y-%m-%d')]
+    # Definir o caminho do arquivo CSV
+    directory = os.getcwd()  # Diretório atual de trabalho
+    file_name = 'tarefas1.csv'
+    file_path = os.path.join(directory, file_name)
 
-# Se houver tarefas no dia atual
-if not tarefas_do_dia.empty:
-    # Montar a mensagem com todas as tarefas do dia
-    mensagem = "Tarefas para hoje:\n"
-    for index, row in tarefas_do_dia.iterrows():
-        mensagem += f"- {row['tarefas']} às {row['hora']}\n"
-    
-    # Enviar a mensagem via WhatsApp
-    message = client.messages.create(
-        body=mensagem,
-        from_='whatsapp:+14155238886',  # Número padrão do Twilio sandbox
-        to='whatsapp:+5511998995650'  # Substitua pelo seu número de WhatsApp
-    )
-    
-    print(f"Mensagem enviada com sucesso! ID: {message.sid}")
-else:
-    print("Nenhuma tarefa para hoje.") 
+    # Criar ou abrir o arquivo CSV
+    with open(file_path, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Tarefa', 'Dia', 'Hora'])
+
+        # Ordenar as tarefas pela data de conclusão
+        tasks_sorted = sorted(
+            pending_tasks, 
+            key=lambda x: x.due.date if x.due else ''
+        )
+
+        # Escrever as tarefas no CSV e enviar a mensagem
+        for task in tasks_sorted:
+            due_date = task.due.date if task.due else 'Sem data'
+            due_time = task.due.datetime if task.due and task.due.datetime else 'Sem hora'
+            writer.writerow([task.content, due_date, due_time])
+            print(f"Tarefa adicionada: {task.content} - {due_date} {due_time}")
+
+            # Enviar mensagem WhatsApp com o template
+            message = client.messages.create(
+                from_=from_whatsapp_number,
+                to=to_whatsapp_number,
+                template_sid='HX0241d8d4ce8d0cfbb20a045fb4291a84',
+                template_data={'task_name': task.content, 'due_date': due_date}
+            )
+            print(f"Mensagem enviada para {to_whatsapp_number} com a tarefa {task.content}")
+
+    print("Arquivo CSV gerado e mensagens enviadas com sucesso.")
+
+except Exception as e:
+    print(f"Erro ao gerar o arquivo CSV ou enviar mensagens: {e}")
