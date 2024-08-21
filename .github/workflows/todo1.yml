@@ -25,15 +25,36 @@ jobs:
     - name: Run Python script
       env:
         YOUR_TODOIST_API_KEY: ${{ secrets.YOUR_TODOIST_API_KEY }}
-      run: python todo1.py
+      run: |
+        # Remover o arquivo CSV se ele existir
+        if [ -f tarefas1.csv ]; then
+          echo "Arquivo CSV existente encontrado. Removendo..."
+          rm tarefas1.csv
+        fi
+        
+        # Executar o script Python para criar um novo arquivo CSV
+        python todo1.py
+        
+        # Verificar se o arquivo CSV foi criado
+        if [ -f tarefas1.csv ]; then
+          echo "Arquivo CSV gerado com sucesso."
+        else
+          echo "Erro: Arquivo CSV não encontrado."
+          exit 1
+        fi
 
     - name: Commit and Push CSV to GitHub
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'github-actions@github.com'
-        git add tarefas1.csv
-        git commit -m "Atualizando arquivo CSV de tarefas" || echo "No changes to commit"
-        git push
+        # Verificar se há arquivos para adicionar
+        if [ -f tarefas1.csv ]; then
+          git add tarefas1.csv
+          git commit -m "Atualizando arquivo CSV de tarefas" || echo "No changes to commit"
+          git push
+        else
+          echo "Erro: Arquivo CSV não encontrado, nada para adicionar."
+        fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
