@@ -1,8 +1,6 @@
 import csv
 import os
 import datetime
-import base64
-import requests
 from todoist_api_python.api import TodoistAPI
 from dotenv import load_dotenv
 
@@ -18,7 +16,7 @@ if not api_key:
 api = TodoistAPI(api_key)
 
 try:
-    # Obter todas as tarefas abertas
+    # Obter todas as tarefas abertas (não completadas)
     tasks = api.get_tasks()
 
     # Verificar se há tarefas
@@ -36,13 +34,13 @@ try:
         writer = csv.writer(file)
         writer.writerow(['Tarefa', 'Dia', 'Hora'])
 
-        # Ordenar as tarefas pela data de conclusão
+        # Filtrar apenas tarefas pendentes e ordenar pela data de conclusão
         tasks_sorted = sorted(
-            tasks, 
+            (task for task in tasks if not task.is_completed), 
             key=lambda x: x.due.date if x.due else ''
         )
 
-        # Escrever as tarefas no CSV
+        # Escrever as tarefas pendentes no CSV
         for task in tasks_sorted:
             due_date = task.due.date if task.due else 'Sem data'
             due_time = task.due.datetime if task.due and task.due.datetime else 'Sem hora'
