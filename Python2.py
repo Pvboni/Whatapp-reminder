@@ -22,7 +22,7 @@ fuso_horario_brasil = pytz.timezone('America/Sao_Paulo')
 data_atual_brasil = datetime.now(fuso_horario_brasil).date()
 
 # Carregar o CSV com as tarefas
-df = pd.read_csv('tarefas1.csv')
+df = pd.read_csv('tarefas.csv')
 
 # Filtrar as tarefas do dia atual no Brasil
 tarefas_do_dia = df[df['dia'] == data_atual_brasil.strftime('%Y-%m-%d')]
