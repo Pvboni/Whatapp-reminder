@@ -1,75 +1,62 @@
-import csv
 import os
-import datetime
-import requests
-from todoist_api_python.api import TodoistAPI
-from dotenv import load_dotenv
 from twilio.rest import Client
+from datetime import datetime, timedelta
+import pytz
+import pandas as pd
 
-# Carregar variáveis de ambiente
-load_dotenv()
+# Carregar credenciais do Twilio das variáveis de ambiente
+account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
 
-# Chave da API do Todoist
-api_key = os.getenv('YOUR_TODOIST_API_KEY')
-if not api_key:
-    print("API key not found.")
+# Verificar se as credenciais foram carregadas corretamente
+if account_sid is None or auth_token is None:
+    print("Twilio credentials not found. Please set the environment variables TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN.")
     exit(1)
-
-api = TodoistAPI(api_key)
-
-# Autenticação Twilio
-account_sid = os.getenv('TWILIO_ACCOUNT_SID')
-auth_token = os.getenv('TWILIO_AUTH_TOKEN')
-from_whatsapp_number = 'whatsapp:+14155238886'
-to_whatsapp_number = 'whatsapp:+5511998995650'
 
 client = Client(account_sid, auth_token)
 
-try:
-    # Obter todas as tarefas abertas
-    tasks = api.get_tasks()
+# Definir o fuso horário do Brasil (São Paulo)
+fuso_horario_brasil = pytz.timezone('America/Sao_Paulo')
 
-    # Filtrar apenas as tarefas pendentes
-    pending_tasks = [task for task in tasks if task.completed is False]
+# Obter a data e hora atual no fuso horário do Brasil
+data_atual_brasil = datetime.now(fuso_horario_brasil).date()
 
-    # Verificar se há tarefas pendentes
-    if not pending_tasks:
-        print("Nenhuma tarefa pendente encontrada.")
-        exit(0)
+# Definir a data final da semana (domingo)
+data_final_semana = data_atual_brasil + timedelta(days=(6 - data_atual_brasil.weekday()))
 
-    # Definir o caminho do arquivo CSV
-    directory = os.getcwd()  # Diretório atual de trabalho
-    file_name = 'tarefas1.csv'
-    file_path = os.path.join(directory, file_name)
+# Carregar o CSV com as tarefas
+df = pd.read_csv('tarefas1.csv')
 
-    # Criar ou abrir o arquivo CSV
-    with open(file_path, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['Tarefa', 'Dia', 'Hora'])
+# Ajustar o cabeçalho para ter a inicial maiúscula
+df.columns = [col.capitalize() for col in df.columns]
 
-        # Ordenar as tarefas pela data de conclusão
-        tasks_sorted = sorted(
-            pending_tasks, 
-            key=lambda x: x.due.date if x.due else ''
+# Converter a coluna 'Dia' para datetime
+df['Dia'] = pd.to_datetime(df['Dia']).dt.date
+
+# Colocar a inicial maiúscula nas colunas 'Tarefa' e 'Hora'
+df['Tarefa'] = df['Tarefa'].str.title()
+df['Hora'] = df['Hora'].str.title()
+
+# Categorizar as tarefas
+tarefas_overdue = df[df['Dia'] < data_atual_brasil]
+tarefas_hoje = df[df['Dia'] == data_atual_brasil]
+tarefas_futuras = df[(df['Dia'] > data_atual_brasil) & (df['Dia'] <= data_final_semana)]
+
+# Enviar mensagens para cada tarefa pendente ou futura
+for index, row in df.iterrows():
+    task_name = row['Tarefa']
+    due_date = row['Dia']
+    due_time = row['Hora']
+    
+    try:
+        # Enviar a mensagem via template no WhatsApp
+        message = client.messages.create(
+            messaging_service_sid='HX0241d8d4ce8d0cfbb20a045fb4291a84',  # ID do template
+            from_='whatsapp:+14155238886',  # Número do Twilio
+            to='whatsapp:+5511998995650',  # Substitua pelo seu número de WhatsApp
+            body=f"Olá! Você tem uma tarefa pendente:\n\nTarefa: {task_name}\nData: {due_date}\nHora: {due_time}\n\nNão se esqueça de completá-la!\n\n- Seu Assistente de Tarefas"
         )
-
-        # Escrever as tarefas no CSV e enviar a mensagem
-        for task in tasks_sorted:
-            due_date = task.due.date if task.due else 'Sem data'
-            due_time = task.due.datetime if task.due and task.due.datetime else 'Sem hora'
-            writer.writerow([task.content, due_date, due_time])
-            print(f"Tarefa adicionada: {task.content} - {due_date} {due_time}")
-
-            # Enviar mensagem WhatsApp com o template
-            message = client.messages.create(
-                from_=from_whatsapp_number,
-                to=to_whatsapp_number,
-                template_sid='HX0241d8d4ce8d0cfbb20a045fb4291a84',
-                template_data={'task_name': task.content, 'due_date': due_date}
-            )
-            print(f"Mensagem enviada para {to_whatsapp_number} com a tarefa {task.content}")
-
-    print("Arquivo CSV gerado e mensagens enviadas com sucesso.")
-
-except Exception as e:
-    print(f"Erro ao gerar o arquivo CSV ou enviar mensagens: {e}")
+        
+        print(f"Mensagem enviada com sucesso! ID: {message.sid}")
+    except Exception as e:
+        print(f"Erro ao enviar mensagem: {e}")
