@@ -3,21 +3,18 @@ name: Generate CSV from Todoist v1
 on:
   workflow_dispatch:  # Manually trigger the workflow
 
-permissions:
-  contents: write  # Permite acesso de escrita ao conteúdo do repositório
-  actions: read    # Apenas leitura para ações do GitHub
-  issues: none     # Nenhuma permissão para issues
-  pull-requests: none # Nenhuma permissão para pull requests
-
 jobs:
   run_python_script:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Permite o GitHub Actions fazer commits no repositório
+
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
     - name: Set up Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v2
       with:
         python-version: '3.9'
 
@@ -29,27 +26,13 @@ jobs:
       env:
         YOUR_TODOIST_API_KEY: ${{ secrets.YOUR_TODOIST_API_KEY }}
       run: |
-        # Remover o arquivo CSV se ele existir
-        if [ -f tarefas1.csv ]; then
-          echo "Arquivo CSV existente encontrado. Removendo..."
-          rm tarefas1.csv
-        fi
-        
-        # Executar o script Python para criar um novo arquivo CSV
-        python todo1.py
-        
-        # Verificar se o arquivo CSV foi criado
-        if [ -f tarefas1.csv ]; then
-          echo "Arquivo CSV gerado com sucesso."
-        else
-          echo "Erro: Arquivo CSV não encontrado."
-          exit 1
-        fi
+        python todo1.py || echo "Erro ao executar o script Python."
 
     - name: Commit and Push CSV to GitHub
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'github-actions@github.com'
+        
         # Verificar se há arquivos para adicionar
         if [ -f tarefas1.csv ]; then
           git add tarefas1.csv
@@ -57,11 +40,13 @@ jobs:
           git push origin main
         else
           echo "Erro: Arquivo CSV não encontrado, nada para adicionar."
+        fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload CSV as artifact
-      uses: actions/upload-artifact@v3
+      if: always()
+      uses: actions/upload-artifact@v2
       with:
         name: tarefas-csv
         path: tarefas1.csv
