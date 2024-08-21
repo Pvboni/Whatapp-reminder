@@ -10,7 +10,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
       with:
-        # Configurar a autenticação para o GitHub Actions
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Python
@@ -51,7 +50,7 @@ jobs:
         if [ -f tarefas1.csv ]; then
           git add tarefas1.csv
           git commit -m "Atualizando arquivo CSV de tarefas" || echo "No changes to commit"
-          git push
+          git push origin main
         else
           echo "Erro: Arquivo CSV não encontrado, nada para adicionar."
         fi
