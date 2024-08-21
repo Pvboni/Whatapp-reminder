@@ -19,27 +19,20 @@ jobs:
       run: |
         pip install python-dotenv todoist-api-python requests
 
-    - name: Validate GitHub Token
-      run: |
-        echo "Validating Personal Access Token..."
-        curl -H "Authorization: token ${{ secrets.PERSONAL_ACCESS_TOKEN }}" https://api.github.com/repos/Pvboni/Whatapp-reminder || exit 1
-      env:
-        PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-
     - name: Run Python script
       env:
         YOUR_TODOIST_API_KEY: ${{ secrets.YOUR_TODOIST_API_KEY }}
       run: python todo1.py
 
-    - name: List files
-      run: ls -la
-
-    - name: Commit and Push CSV to GitHub
+    - name: Configure Git
       run: |
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
+
+    - name: Commit and Push CSV to GitHub
+      run: |
         git add tarefas1.csv
-        git commit -m "Atualizando arquivo CSV de tarefas"
+        git commit -m "Atualizando arquivo CSV de tarefas" || echo "No changes to commit"
         git push https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/Pvboni/Whatapp-reminder.git main
       env:
         PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
