@@ -25,7 +25,7 @@ data_atual_brasil = datetime.now(fuso_Horario_brasil).date()
 data_final_semana = data_atual_brasil + timedelta(days=(6 - data_atual_brasil.weekday()))
 
 # Carregar o CSV com as Tarefas
-df = pd.read_csv('Tarefas1.csv')
+df = pd.read_csv('tarefas1.csv')
 
 # Converter a coluna 'Dia' para datetime
 df['Dia'] = pd.to_datetime(df['Dia']).dt.date
