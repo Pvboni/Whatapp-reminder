@@ -25,7 +25,7 @@ data_atual_brasil = datetime.now(fuso_horario_brasil).date()
 df = pd.read_csv('tarefas1.csv')
 
 # Filtrar as tarefas do dia atual no Brasil
-tarefas_do_dia = df[df['dia'] == data_atual_brasil.strftime('%Y-%m-%d')]
+tarefas_do_dia = df[df['Dia'] == data_atual_brasil.strftime('%Y-%m-%d')]
 
 # Se houver tarefas no dia atual
 if not tarefas_do_dia.empty:
