@@ -1,8 +1,8 @@
 import os
+import pandas as pd
 from twilio.rest import Client
 from datetime import datetime, timedelta
 import pytz
-import pandas as pd
 
 # Carregar credenciais do Twilio das variáveis de ambiente
 account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
@@ -42,21 +42,42 @@ tarefas_overdue = df[df['Dia'] < data_atual_brasil]
 tarefas_hoje = df[df['Dia'] == data_atual_brasil]
 tarefas_futuras = df[(df['Dia'] > data_atual_brasil) & (df['Dia'] <= data_final_semana)]
 
-# Enviar mensagens para cada tarefa pendente ou futura
-for index, row in df.iterrows():
-    task_name = row['Tarefa']
-    due_date = row['Dia']
-    due_time = row['Hora']
-    
+# Montar a mensagem
+mensagem = ""
+
+# Adicionar tarefas overdue
+if not tarefas_overdue.empty:
+    mensagem += "Tarefas Overdue:\n"
+    for index, row in tarefas_overdue.iterrows():
+        mensagem += f"- {row['Tarefa']} (Vencida em {row['Dia']}) Às {row['Hora']}\n"
+    mensagem += "\n"
+
+# Adicionar tarefas de hoje
+if not tarefas_hoje.empty:
+    mensagem += "Tarefas para Hoje:\n"
+    for index, row in tarefas_hoje.iterrows():
+        mensagem += f"- {row['Tarefa']} Às {row['Hora']}\n"
+    mensagem += "\n"
+
+# Adicionar tarefas futuras dentro da semana
+if not tarefas_futuras.empty:
+    mensagem += "Tarefas Futuras Desta Semana:\n"
+    for index, row in tarefas_futuras.iterrows():
+        mensagem += f"- {row['Tarefa']} No Dia {row['Dia']} Às {row['Hora']}\n"
+    mensagem += "\n"
+
+# Verificar se há alguma tarefa a ser enviada
+if mensagem:
     try:
-        # Enviar a mensagem via template no WhatsApp
+        # Enviar a mensagem via WhatsApp
         message = client.messages.create(
-            messaging_service_sid='HX0241d8d4ce8d0cfbb20a045fb4291a84',  # ID do template
-            from_='whatsapp:+14155238886',  # Número do Twilio
-            to='whatsapp:+5511998995650',  # Substitua pelo seu número de WhatsApp
-            body=f"Olá! Você tem uma tarefa pendente:\n\nTarefa: {task_name}\nData: {due_date}\nHora: {due_time}\n\nNão se esqueça de completá-la!\n\n- Seu Assistente de Tarefas"
+            body=mensagem,
+            from_='whatsapp:+14155238886',  # Número padrão do Twilio sandbox
+            to='whatsapp:+5511998995650'  # Substitua pelo seu número de WhatsApp
         )
         
         print(f"Mensagem enviada com sucesso! ID: {message.sid}")
     except Exception as e:
         print(f"Erro ao enviar mensagem: {e}")
+else:
+    print("Nenhuma tarefa para enviar.")
